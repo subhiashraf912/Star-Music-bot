@@ -66,6 +66,7 @@ readevents("events");
 readcommands("cmds");
 readcommands("cmds/music");
 readcommands("cmds/anime");
+readcommands("cmds/moderation");
 
 readcommands("cmds/utility");
 
