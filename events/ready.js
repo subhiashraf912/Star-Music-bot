@@ -4,6 +4,9 @@ module.exports = async (bot) => {
 
   aze.send(`Bot is online!`);
 
+
+
+
   bot.user
     .setActivity(`${process.env.prefix}help`, { type: "WATCHING" })
     .catch(console.error);

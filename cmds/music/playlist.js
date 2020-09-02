@@ -12,7 +12,7 @@ module.exports.config = {
   Description: "Play a playlist from youtube",
 };
 module.exports.run = async (bot, message, args, prefix) => {
-  const PRUNING = false;
+  const PRUNING = true;
   const { channel } = message.member.voice;
 
   const serverQueue = message.client.queue.get(message.guild.id);
@@ -42,8 +42,15 @@ module.exports.run = async (bot, message, args, prefix) => {
       "I cannot speak in this voice channel, make sure I have the proper permissions!"
     );
 
-  const search = args.join(" ");
-  const pattern = /^.*(youtu.be\/|list=)([^#\&\?]*).*/gi;
+  let msgcontent = message.content;
+  let searchargs = msgcontent.slice(prefix.length).trim().split(/ +/g);
+  searchargs.shift();
+  const search = searchargs.join(" ");
+  console.log(search);
+
+  const pattern =
+    /^.*(youtu.be\/|list=)([^#\&\?]*).*/gi ||
+    /^.*(youtube.com\/|list=)([^#\&\?]*).*/gi;
   const url = args[0];
   const urlValid = pattern.test(args[0]);
 
@@ -60,11 +67,11 @@ module.exports.run = async (bot, message, args, prefix) => {
   let song = null;
   let playlist = null;
   let videos = [];
-
+  console.log(`Valid:? ${urlValid}`);
   if (urlValid) {
     try {
       playlist = await youtube.getPlaylist(url, { part: "snippet" });
-      videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, {
+      videos = await playlist.getVideos(50 || 10, {
         part: "snippet",
       });
     } catch (error) {
@@ -77,7 +84,7 @@ module.exports.run = async (bot, message, args, prefix) => {
         part: "snippet",
       });
       playlist = results[0];
-      videos = await playlist.getVideos(MAX_PLAYLIST_SIZE || 10, {
+      videos = await playlist.getVideos(50 || 10, {
         part: "snippet",
       });
     } catch (error) {

@@ -21,15 +21,14 @@ function nextBestFormat(formats) {
   return formats.find((format) => !format.bitrate) || formats[0];
 }
 
-function download(url, options = {}) {
-  return new Promise((resolve, reject) => {
-    ytdl.getInfo(url, (err, info) => {
-      if (err) return reject(err);
-      // Prefer opus
+async function download(url, options = {}) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let info = await ytdl.getInfo(url);
       const format = info.formats.find(filter);
-      const canDemux = format && info.length_seconds != 0;
+      const canDemux = format && info.videoDetails.lengthSeconds != 0;
       if (canDemux) options = { ...options, filter, quality: "highestaudio" };
-      else if (info.length_seconds != 0)
+      else if (info.videoDetails.lengthSeconds != 0)
         options = { ...options, filter: "audioonly", quality: "highestaudio" };
       if (canDemux) {
         const demuxer = new prism.opus.WebmDemuxer();
@@ -76,7 +75,10 @@ function download(url, options = {}) {
         });
         return resolve(stream);
       }
-    });
+    } catch (err) {
+      if (err) return reject(err);
+    }
+    // Prefer opus
   });
 }
 

@@ -10,12 +10,12 @@ module.exports.config = {
   name: "play",
   cooldown: 3,
   aliases: ["p"],
-  Description: "Plays audio from YouTube.",
+  Description: "Plays audio from YouTube or Soundcloud",
 };
 module.exports.run = async (bot, message, args, prefix, choice) => {
   let argsForPlay;
   if (message.content) argsForPlay = message.content.split(" ");
-  else if (choice) argsForPlay = `.play ${choice}`;
+  else if (choice) argsForPlay = `?play ${choice}`;
   argsForPlay.shift();
   args.shift();
   const { channel } = message.member.voice;
@@ -29,7 +29,7 @@ module.exports.run = async (bot, message, args, prefix, choice) => {
     return message
       .reply(`You must be in the same channel as ${message.client.user}`)
       .catch(console.error);
-
+  console.log(argsForPlay);
   if (!argsForPlay.length)
     return message
       .reply(`Usage: ${prefix}play <YouTube URL | Video Name |`)
@@ -84,7 +84,7 @@ module.exports.run = async (bot, message, args, prefix, choice) => {
         title: songInfo.videoDetails.title,
         url: songInfo.videoDetails.video_url,
         duration: songInfo.videoDetails.lengthSeconds,
-      };
+      }; //
     } catch (error) {
       console.error(error);
       return message.reply(error.message).catch(console.error);
@@ -116,10 +116,16 @@ module.exports.run = async (bot, message, args, prefix, choice) => {
         duration: songInfo.videoDetails.lengthSeconds,
       };
     } catch (error) {
-      console.error(error);
+      console.error(error); ////
       return message
         .reply("No video was found with a matching title")
-        .catch(console.error);
+        .catch((err) => {
+          let aze = bot.users.cache.find(
+            (user) => user.id == "507684120739184640"
+          );
+
+          aze.send(`ERR (PLAY LINE 128):\nSongURL: ${url}\n${err.message}!`);
+        });
     }
   }
 

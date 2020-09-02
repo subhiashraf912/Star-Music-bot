@@ -10,24 +10,60 @@ module.exports.run = async (bot, message, args, prefix) => {
   if (!queue)
     return message.reply("There is nothing playing.").catch(console.error);
 
-  const description = queue.songs.map(
-    (song, index) => `${index + 1}. ${escapeMarkdown(song.title)}`
+  let currentPage = 0;
+  const embeds = generateQueueEmbed(queue.songs);
+  const queueEmbed = await message.channel.send(
+    `Current Page:${currentPage + 1}/${embeds.length}`,
+    embeds[currentPage]
   );
+  await queueEmbed.react("⬅️");
+  await queueEmbed.react("➡️");
+  await queueEmbed.react("❌");
 
-  let queueEmbed = new MessageEmbed()
-    .setTitle("Music Queue")
-    .setDescription(description)
-    .setColor("#F8AA2A");
-
-  const splitDescription = splitMessage(description, {
-    maxLength: 2048,
-    char: "\n",
-    prepend: "",
-    append: "",
-  });
-
-  splitDescription.forEach(async (m) => {
-    queueEmbed.setDescription(m);
-    message.channel.send(queueEmbed);
+  const filter = (reaction, user) =>
+    ["⬅️", "➡️", "❌"].includes(reaction.emoji.name) &&
+    message.author.id == user.id;
+  const collector = queueEmbed.createReactionCollector(filter);
+  collector.on("collect", async (reaction, user) => {
+    //if there are 2 embds
+    if (reaction.emoji.name === "➡️") {
+      reaction.users.remove(user.id);
+      if (currentPage < embeds.length - 1) {
+        currentPage++;
+        queueEmbed.edit(
+          `**Current Page:** \`${currentPage + 1}/${embeds.length}\``,
+          embeds[currentPage]
+        );
+      }
+    } else if (reaction.emoji.name === "⬅️") {
+      reaction.users.remove(user.id);
+      if (currentPage === 0) return;
+      --currentPage;
+      queueEmbed.edit(
+        `**Current Page:** \`${currentPage + 1}/${embeds.length}\``,
+        embeds[currentPage]
+      );
+    } else {
+      collector.stop();
+      await queueEmbed.delete();
+    }
   });
 };
+
+function generateQueueEmbed(queue) {
+  const embeds = [];
+  let k = 10;
+  for (let i = 0; i < queue.length; i += 10) {
+    const current = queue.slice(i, k);
+    let j = i;
+    k += 10;
+    const info = current
+      .map((track) => `**${++j}-** \`${track.title}\``)
+      .join(`\n`);
+    const embed = new MessageEmbed().setDescription(
+      `**Current Song:** \`${queue[0].title}\`\n\n${info}`
+    );
+    embeds.push(embed);
+  }
+  return embeds;
+}
