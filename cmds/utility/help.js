@@ -23,6 +23,32 @@ module.exports.run = async (bot, message, args) => {
           }\n**Aliases:** ${command.config.aliases || command.config.noalias}`
         );
       message.channel.send(SHembed);
+    } else if (args[1] === "moderation") {
+      let embed = new Discord.MessageEmbed()
+        .setColor("RANDOM")
+        .setTitle("Moderation Commands")
+        .addField(
+          "?ban",
+          `to ban someone! use ?ban @someone or ?ban @someone [reason of banning him]`
+        )
+        .addField(
+          "?kick",
+          `to kick someone! use ?kick @someone or ?kick @someone [reason of kicking him]`
+        );
+      message.channel.send(embed);
+    } else if (args[1] === "utility") {
+      let embed = new Discord.MessageEmbed()
+        .setColor("RANDOM")
+        .setTitle("Utility Commands")
+        .addField(
+          "?avatar",
+          `to get the avatar! use ?avatar (gets ur avatar) or ?avatar [Member ID/Mention Member/Member Tag/Member Username](to get someone's avatar)`
+        )
+        .addField(
+          "?invite",
+          `Generates an invite link of the bot and sends it for your via dm!`
+        );
+      message.channel.send(embed);
     }
   }
 
@@ -55,7 +81,15 @@ module.exports.run = async (bot, message, args) => {
       .addField("search", "Search and select videos to play.", true)
       .addField("skipto(st)", "Skip to the selected queue number.", true)
       .addField("volume(v)", "Change volume of currently playing music.", true)
+      .addField(
+        `Moderation Commands`,
+        `Type \`?help moderation\` to get the commands`
+      )
 
+      .addField(
+        `Utility Commands`,
+        `Type \`?help utility\` to get the commands`
+      )
       .setFooter(bot.user.username, bot.user.displayavatarURL);
     message.channel.send(Sembed);
     // message.author.send(Sembed);
